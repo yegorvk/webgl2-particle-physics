@@ -1,0 +1,6 @@
+{
+    "extends": "@tsconfig/svelte/tsconfig.json",
+    "include": ["src/**/*", "particle_system_wasm/pkg/**/*.d.ts"],
+    "exclude": ["node_modules/*", "__sapper__/*", "public/*", "wasm_out/*"],
+    "lib": ["es2015", "dom"]
+}
