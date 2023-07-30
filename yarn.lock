@@ -1580,6 +1580,7 @@ __metadata:
     tslib: ^2.6.0
     typescript: ^5.1.6
     wasm-pack: ^0.12.1
+    webgl-lint: ^1.11.2
     yarn-or-npm: ^3.0.1
   languageName: unknown
   linkType: soft
@@ -2243,6 +2244,13 @@ __metadata:
   bin:
     wasm-pack: run.js
   checksum: 497abceb48b15329bb30f614b9ed7b07d82554ff225b93485794fb91b074a98aeda8091146aafe969c7f9615d106c770d215cf916bebf65451978f7222fcbe0b
+  languageName: node
+  linkType: hard
+
+"webgl-lint@npm:^1.11.2":
+  version: 1.11.2
+  resolution: "webgl-lint@npm:1.11.2"
+  checksum: 671c27eee262677b3a735045ab4ef21e064c7838a115bd4e802d6da857acf24640774d78358590dcde4a0061da8848ac97433f152672e73e2637b51ddb89ce94
   languageName: node
   linkType: hard
 

@@ -1,20 +1,22 @@
-mod renderer;
-
 extern crate core;
 
 use std::cell::OnceCell;
 use std::panic;
 
-use log::{info, Level};
+use log::{debug, info, Level};
 use wasm_bindgen::prelude::*;
-use web_sys::HtmlCanvasElement;
+use web_sys::{HtmlCanvasElement, window};
 use winit::dpi::LogicalSize;
 use winit::error::OsError;
 use winit::event::{Event, WindowEvent};
 use winit::event_loop::{EventLoop, EventLoopBuilder, EventLoopProxy};
 use winit::platform::web::WindowBuilderExtWebSys;
 use winit::window::{Window, WindowBuilder};
-use crate::renderer::Renderer;
+
+use crate::graphics::Graphics;
+
+mod particle;
+mod graphics;
 
 #[cfg(debug_assertions)]
 const LOG_LEVEL: Level = Level::Debug;
@@ -46,7 +48,7 @@ pub async fn run(canvas: HtmlCanvasElement, canvas_width: u32, canvas_height: u3
     });
 
     let app = App::new(&context, canvas, LogicalSize::new(canvas_width, canvas_height))
-        .await.expect("could not create application");
+        .expect("could not create application");
 
     app.run(context);
 }
@@ -87,19 +89,24 @@ impl Context {
 }
 
 struct App {
-    renderer: Renderer
+    graphics: Graphics,
+    window: Window,
 }
 
 impl App {
-    pub async fn new(context: &Context, canvas: HtmlCanvasElement, size: LogicalSize<u32>) -> anyhow::Result<App> {
+    pub fn new(context: &Context, canvas: HtmlCanvasElement, size: LogicalSize<u32>) -> anyhow::Result<App> {
         let window = App::create_window(&context.event_loop, canvas, size)?;
 
         Ok(App {
-            renderer: Renderer::new(window).await?
+            graphics: Graphics::initialize_with_window(&window),
+            window,
         })
     }
 
-    pub fn run(mut self, context: Context) -> ! {
+    pub fn run(self, context: Context) -> ! {
+        let performance = window().unwrap().performance().unwrap();
+        let mut last_frame_time = performance.now();
+
         context.event_loop.run(move |event, _, control_flow| {
             control_flow.set_poll();
 
@@ -109,29 +116,36 @@ impl App {
                     event,
                     ..
                 } => {
-                    if !self.renderer.handle_win_event(&event) {
+                    if !self.graphics.event(&event) {
                         match event {
                             WindowEvent::CloseRequested => control_flow.set_exit(),
                             _ => {}
                         }
                     }
-                },
-                Event::RedrawRequested(_) => self.draw_frame().unwrap(),
-                Event::MainEventsCleared => self.renderer.window().request_redraw(),
+                }
+                Event::RedrawRequested(_) => {
+                    let cur_frame_time = performance.now();
+                    let delta_time = cur_frame_time - last_frame_time;
+                    last_frame_time = cur_frame_time;
+
+                    debug!("FPS (instantaneous): {}", 1000.0 / delta_time);
+
+                    self.frame(delta_time)
+                }
+                Event::MainEventsCleared => self.window.request_redraw(),
                 _ => {}
             }
         })
     }
 
-    fn handle_user_event(&mut self, event: AppEvent) {
+    fn handle_user_event(&self, event: AppEvent) {
         match event {
-            AppEvent::ResizeRequested(size) => self.renderer.window().set_inner_size(size)
+            AppEvent::ResizeRequested(size) => self.window.set_inner_size(size)
         }
     }
 
-    fn draw_frame(&mut self) -> anyhow::Result<()> {
-        self.renderer.draw()?;
-        Ok(())
+    fn frame(&self, delta_time_ms: f64) {
+        self.graphics.frame(delta_time_ms);
     }
 
     fn create_window(event_loop: &EventLoop<AppEvent>, canvas: HtmlCanvasElement, size: LogicalSize<u32>) -> Result<Window, OsError> {
