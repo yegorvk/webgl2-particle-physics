@@ -1,6 +1,6 @@
-dist/
 node_modules/
 target/
 .yarn/
 public/generated/
 particle_system_wasm/pkg
+rollup.config-*.cjs
