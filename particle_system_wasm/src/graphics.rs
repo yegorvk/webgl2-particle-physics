@@ -41,6 +41,8 @@ const PARTICLE_RADIUS: f32 = 0.00144675925;
 const PARTICLE_SCALE: f32 = 1.0;
 const PARTICLE_RADIUS_SCALED: f32 = (PARTICLE_RADIUS as f64 * PARTICLE_SCALE as f64) as f32;
 
+const TIME_SCALE: f64 = 0.5;
+
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 enum VertexShaderId {
     Draw,
@@ -303,7 +305,7 @@ impl Graphics {
 
                     gl.uniform1f(
                         Some(ctx.uniform_location()),
-                        (state.borrow().delta_time_ms / 1000.0) as f32,
+                        (state.borrow().delta_time_ms / 1000.0 * TIME_SCALE) as f32,
                     );
                 },
             )
