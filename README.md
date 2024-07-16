@@ -1,4 +1,4 @@
 # webgl2-particle-physics
-WebGL2 particle physics demo featuring dynamic collisions (between particles) with resolution in linear time.
+WebGL2 particle simulation demo with dynamic collisions between particles. 
 
 Live demo: [egor-vaskon.github.io/webgl2-particle-physics](https://yegorvk.github.io/webgl2-particle-physics/).
